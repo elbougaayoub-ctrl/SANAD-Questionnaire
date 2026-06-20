@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANAD — Questionnaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0F1B2D;
+    --panel:#16243B;
+    --panel-light:#1D3050;
+    --line: rgba(232,184,109,0.14);
+    --saffron:#E8B86D;
+    --saffron-dim: rgba(232,184,109,0.16);
+    --teal:#4ECDC4;
+    --coral:#FF6B5B;
+    --cream:#F5F1E8;
+    --cream-dim: rgba(245,241,232,0.6);
+    --cream-dimmer: rgba(245,241,232,0.38);
+    --radius: 18px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:'Inter', sans-serif;
+    background:
+      radial-gradient(circle at 85% 10%, rgba(78,205,196,0.07), transparent 45%),
+      radial-gradient(circle at 10% 90%, rgba(232,184,109,0.08), transparent 50%),
+      var(--night);
+    color:var(--cream);
+    min-height:100vh;
+    overflow-x:hidden;
+    overflow-y:hidden;
+  }
+  body.app-active{ overflow-y:auto; }
+
+  /* ---------- Zellige pattern background ---------- */
+  .zellige-bg{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    opacity:0.05;
+    pointer-events:none;
+    background-image:
+      repeating-linear-gradient(45deg, var(--saffron) 0px, var(--saffron) 1px, transparent 1px, transparent 42px),
+      repeating-linear-gradient(-45deg, var(--saffron) 0px, var(--saffron) 1px, transparent 1px, transparent 42px);
+  }
+
+  .app{
+    display:flex;
+    min-height:100vh;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{
+    width:300px;
+    min-width:300px;
+    background:linear-gradient(180deg, var(--panel) 0%, var(--night) 100%);
+    border-right:1px solid var(--line);
+    padding:32px 24px;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  }
+
+  .brand-mark{
+    width:42px;
+    height:42px;
+    border-radius:11px;
+    background:linear-gradient(135deg, var(--saffron), var(--coral));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:18px;
+    color:var(--night);
+    flex-shrink:0;
+    box-shadow:0 8px 20px -6px rgba(232,184,109,0.5);
+  }
+
+  .brand-name{
+    font-family:'Cairo', sans-serif;
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:0.5px;
+    color:var(--cream);
+  }
+
+  .brand-tag{
+    font-size:11px;
+    color:var(--cream-dimmer);
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:32px;
+    margin-top:2px;
+  }
+
+  /* overall progress ring */
+  .ring-wrap{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px;
+    background:var(--panel-light);
+    border-radius:var(--radius);
+    margin-bottom:28px;
+    border:1px solid var(--line);
+  }
+
+  .ring-svg{ flex-shrink:0; }
+  .ring-bg{ fill:none; stroke:rgba(245,241,232,0.08); stroke-width:5; }
+  .ring-fg{
+    fill:none;
+    stroke:var(--saffron);
+    stroke-width:5;
+    stroke-linecap:round;
+    transform:rotate(-90deg);
+    transform-origin:50% 50%;
+    transition:stroke-dashoffset 0.6s cubic-bezier(.65,0,.35,1);
+  }
+  .ring-label{
+    font-family:'Cairo',sans-serif;
+    font-weight:800;
+    font-size:15px;
+    fill:var(--cream);
+    text-anchor:middle;
+    dominant-baseline:middle;
+    transform:rotate(0deg);
+  }
+
+  .ring-text-title{ font-size:13px; font-weight:600; color:var(--cream); margin-bottom:2px;}
+  .ring-text-sub{ font-size:11.5px; color:var(--cream-dimmer); }
+
+  .nav-list{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    flex:1;
+  }
+
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:background 0.25s, transform 0.2s;
+    position:relative;
+    border:1px solid transparent;
+  }
+
+  .nav-item:hover{ background:rgba(245,241,232,0.04); }
+
+  .nav-item.active{
+    background:var(--saffron-dim);
+    border-color:rgba(232,184,109,0.35);
+  }
+
+  .nav-item.locked{
+    opacity:0.38;
+    cursor:not-allowed;
+  }
+
+  .nav-num{
+    width:30px;
+    height:30px;
+    border-radius:9px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    background:rgba(245,241,232,0.06);
+    color:var(--cream-dim);
+    flex-shrink:0;
+    transition:all 0.3s;
+  }
+
+  .nav-item.active .nav-num{
+    background:var(--saffron);
+    color:var(--night);
+  }
+
+  .nav-item.done .nav-num{
+    background:var(--teal);
+    color:var(--night);
+  }
+
+  .nav-item.done .nav-num::after{
+    content:"✓";
+  }
+  .nav-item.done .nav-num{ font-size:0; }
+  .nav-item.done .nav-num::after{ font-size:14px; }
+
+  .nav-text{ display:flex; flex-direction:column; min-width:0; }
+  .nav-title{ font-size:13.5px; font-weight:600; color:var(--cream); white-space:nowrap; }
+  .nav-sub{ font-size:11px; color:var(--cream-dimmer); }
+  .nav-item.locked .nav-title, .nav-item.locked .nav-sub{ color:var(--cream-dimmer); }
+
+  .lock-icon{ margin-left:auto; font-size:13px; opacity:0.6; }
+
+  .sidebar-footer{
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--cream-dimmer);
+    line-height:1.6;
+  }
+
+  /* ============ MAIN ============ */
+  .main{
+    flex:1;
+    padding:56px 64px;
+    display:flex;
+    justify-content:center;
+    min-width:0;
+  }
+
+  .content{
+    width:100%;
+    max-width:720px;
+  }
+
+  .top-progress{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:36px;
+  }
+
+  .top-progress-bar{
+    flex:1;
+    height:6px;
+    background:rgba(245,241,232,0.08);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .top-progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--saffron), var(--coral));
+    border-radius:6px;
+    width:5%;
+    transition:width 0.6s cubic-bezier(.65,0,.35,1);
+  }
+  .top-progress-count{
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    color:var(--cream-dim);
+    white-space:nowrap;
+  }
+
+  .part{
+    display:none;
+    animation:fadeUp 0.5s ease forwards;
+  }
+  .part.visible{ display:block; }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .part-eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--teal);
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .part-eyebrow::before{
+    content:"";
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 4px rgba(78,205,196,0.18);
+  }
+
+  .part-title{
+    font-family:'Cairo',sans-serif;
+    font-weight:800;
+    font-size:32px;
+    line-height:1.2;
+    margin-bottom:10px;
+    color:var(--cream);
+  }
+
+  .part-desc{
+    font-size:15px;
+    color:var(--cream-dim);
+    margin-bottom:36px;
+    line-height:1.6;
+    max-width:560px;
+  }
+
+  .q-block{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    margin-bottom:18px;
+    transition:border-color 0.3s, transform 0.2s;
+  }
+  .q-block:focus-within, .q-block.answered{
+    border-color:rgba(232,184,109,0.4);
+  }
+
+  .q-num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:26px;
+    height:26px;
+    border-radius:8px;
+    background:rgba(232,184,109,0.14);
+    color:var(--saffron);
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    margin-right:10px;
+  }
+
+  .q-text{
+    font-size:16px;
+    font-weight:600;
+    color:var(--cream);
+    margin-bottom:18px;
+    display:flex;
+    align-items:flex-start;
+    line-height:1.45;
+  }
+
+  .q-text-inner{ padding-top:2px; }
+
+  /* choice pills */
+  .choices{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .choice{
+    padding:11px 20px;
+    border-radius:999px;
+    border:1.5px solid rgba(245,241,232,0.14);
+    background:rgba(245,241,232,0.03);
+    color:var(--cream-dim);
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all 0.2s;
+    user-select:none;
+  }
+  .choice:hover{
+    border-color:rgba(232,184,109,0.4);
+    background:rgba(232,184,109,0.06);
+    color:var(--cream);
+  }
+  .choice.selected{
+    background:var(--saffron);
+    border-color:var(--saffron);
+    color:var(--night);
+    font-weight:700;
+  }
+
+  /* scale 1-5 */
+  .scale-wrap{ display:flex; flex-direction:column; gap:10px; }
+  .scale{
+    display:flex;
+    gap:8px;
+  }
+  .scale-opt{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .scale-circle{
+    width:100%;
+    aspect-ratio:1;
+    border-radius:14px;
+    border:1.5px solid rgba(245,241,232,0.14);
+    background:rgba(245,241,232,0.03);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    color:var(--cream-dim);
+    transition:all 0.2s;
+  }
+  .scale-opt:hover .scale-circle{ border-color:rgba(232,184,109,0.4); }
+  .scale-opt.selected .scale-circle{
+    background:linear-gradient(135deg, var(--saffron), var(--coral));
+    border-color:transparent;
+    color:var(--night);
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px -6px rgba(255,107,91,0.45);
+  }
+  .scale-caption{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--cream-dimmer);
+    padding:0 4px;
+  }
+
+  /* text input */
+  .text-input{
+    width:100%;
+    background:rgba(245,241,232,0.04);
+    border:1.5px solid rgba(245,241,232,0.14);
+    border-radius:12px;
+    padding:13px 16px;
+    color:var(--cream);
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  .text-input:focus{ border-color:var(--saffron); }
+  .text-input::placeholder{ color:var(--cream-dimmer); }
+
+  /* select dropdown for ville */
+  select.text-input{
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23E8B86D' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    cursor:pointer;
+  }
+  select.text-input option{ background:var(--panel); color:var(--cream); }
+
+  /* feature card grid for last question */
+  .feature-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .feature-card{
+    padding:20px;
+    border-radius:14px;
+    border:1.5px solid rgba(245,241,232,0.14);
+    background:rgba(245,241,232,0.03);
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .feature-card:hover{ border-color:rgba(232,184,109,0.4); }
+  .feature-card.selected{
+    border-color:var(--teal);
+    background:rgba(78,205,196,0.1);
+  }
+  .feature-icon{ font-size:22px; margin-bottom:8px; display:block; }
+  .feature-name{ font-family:'Cairo',sans-serif; font-weight:700; font-size:14.5px; color:var(--cream); margin-bottom:4px; }
+  .feature-desc{ font-size:12px; color:var(--cream-dimmer); line-height:1.4; }
+
+  /* nav buttons */
+  .actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:36px;
+    padding-top:28px;
+    border-top:1px solid var(--line);
+  }
+
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    padding:13px 26px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+    transition:all 0.2s;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--saffron), var(--coral));
+    color:var(--night);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px -8px rgba(255,107,91,0.5); }
+  .btn-primary:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+    transform:none;
+    box-shadow:none;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--cream-dim);
+    border:1.5px solid rgba(245,241,232,0.14);
+  }
+  .btn-ghost:hover{ border-color:rgba(245,241,232,0.3); color:var(--cream); }
+  .btn-ghost:disabled{ opacity:0.25; cursor:not-allowed; }
+
+  .hint-incomplete{
+    font-size:12.5px;
+    color:var(--coral);
+    margin-top:-22px;
+    margin-bottom:18px;
+    display:none;
+    align-items:center;
+    gap:6px;
+  }
+  .hint-incomplete.show{ display:flex; }
+
+  /* ============ SUBMIT / DONE SCREEN ============ */
+  .done-screen{
+    display:none;
+    text-align:center;
+    padding:60px 20px;
+  }
+  .done-screen.visible{ display:block; animation:fadeUp 0.6s ease; }
+  .done-badge{
+    width:84px; height:84px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--teal), var(--saffron));
+    display:flex; align-items:center; justify-content:center;
+    font-size:36px;
+    margin:0 auto 24px;
+    box-shadow:0 16px 40px -10px rgba(78,205,196,0.5);
+  }
+  .done-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:28px; margin-bottom:12px; }
+  .done-desc{ color:var(--cream-dim); font-size:15px; max-width:440px; margin:0 auto; line-height:1.6; }
+
+  .done-badge.loading{
+    background:none;
+    box-shadow:none;
+    border:4px solid rgba(245,241,232,0.12);
+    border-top-color:var(--saffron);
+    animation:spin 0.8s linear infinite;
+    font-size:0;
+  }
+  .done-badge.error{
+    background:linear-gradient(135deg, var(--coral), #d94a3c);
+    box-shadow:0 16px 40px -10px rgba(255,107,91,0.5);
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ============ MOBILE ============ */
+  .mobile-toggle{
+    display:none;
+    position:fixed;
+    top:18px; left:18px;
+    z-index:50;
+    width:46px; height:46px;
+    border-radius:12px;
+    background:var(--panel-light);
+    border:1px solid var(--line);
+    color:var(--cream);
+    font-size:18px;
+    align-items:center;
+    justify-content:center;
+  }
+
+  @media (max-width: 900px){
+    .sidebar{
+      position:fixed;
+      left:0; top:0;
+      transform:translateX(-100%);
+      z-index:40;
+      box-shadow:0 0 60px rgba(0,0,0,0.6);
+      transition:transform 0.3s ease;
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .mobile-toggle{ display:flex; }
+    .main{ padding:90px 20px 50px; }
+    .feature-grid{ grid-template-columns:1fr; }
+    .part-title{ font-size:26px; }
+  }
+
+  /* focus visibility */
+  .choice:focus-visible, .scale-circle:focus-visible, .btn:focus-visible, .nav-item:focus-visible, .feature-card:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  /* ============ COVER PAGE ============ */
+  .cover{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(168,103,232,0.16), transparent 50%),
+      radial-gradient(circle at 80% 75%, rgba(78,205,196,0.14), transparent 50%),
+      var(--night);
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+  .cover.hidden{ display:none; }
+
+  .cover-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 40px;
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+    gap:16px;
+    background:rgba(15,27,45,0.6);
+    backdrop-filter:blur(6px);
+  }
+  .cover-brand{
+    font-family:'Cairo',sans-serif;
+    font-weight:800;
+    font-size:18px;
+    letter-spacing:1px;
+    color:var(--cream);
+  }
+  .cover-steps{
+    display:flex;
+    gap:10px;
+  }
+  .cover-step{
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1.5px solid rgba(245,241,232,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--cream-dimmer);
+  }
+  .cover-pct{
+    font-family:'Cairo',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--cream-dim);
+  }
+
+  .cover-body{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    padding:64px 24px 56px;
+    max-width:760px;
+    margin:0 auto;
+  }
+
+  /* animated multicolor bar chart */
+  .cover-chart{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    height:160px;
+    margin-bottom:40px;
+  }
+  .cover-bar{
+    width:22px;
+    border-radius:8px 8px 3px 3px;
+    transform-origin:bottom;
+    animation:growBar 0.9s cubic-bezier(.34,1.56,.64,1) forwards;
+    opacity:0;
+  }
+  .cover-bar:nth-child(1){ background:#A867E8; height:38%; animation-delay:0.05s; }
+  .cover-bar:nth-child(2){ background:#FF4D8D; height:62%; animation-delay:0.15s; }
+  .cover-bar:nth-child(3){ background:#FF9A3D; height:50%; animation-delay:0.25s; }
+  .cover-bar:nth-child(4){ background:#4ECDC4; height:78%; animation-delay:0.35s; }
+  .cover-bar:nth-child(5){ background:#5B8DFF; height:46%; animation-delay:0.45s; }
+  .cover-bar:nth-child(6){ background:#2BD9A0; height:100%; animation-delay:0.55s; }
+
+  @keyframes growBar{
+    from{ opacity:0; transform:scaleY(0); }
+    to{ opacity:1; transform:scaleY(1); }
+  }
+
+  .cover-eyebrow{
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--cream-dimmer);
+    margin-bottom:18px;
+  }
+
+  .cover-logo{
+    font-family:'Cairo',sans-serif;
+    font-weight:900;
+    font-size:clamp(54px, 12vw, 96px);
+    letter-spacing:2px;
+    line-height:1;
+    margin-bottom:28px;
+    background:linear-gradient(90deg, #A867E8, #FF4D8D, #FF9A3D, #4ECDC4, #2BD9A0);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .cover-desc{
+    font-size:17px;
+    line-height:1.6;
+    color:var(--cream-dim);
+    max-width:560px;
+    margin-bottom:28px;
+  }
+
+  .cover-meta{
+    font-family:'Cairo',sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--cream-dimmer);
+    margin-bottom:36px;
+  }
+  .cover-meta span{ margin:0 10px; color:rgba(245,241,232,0.2); }
+
+  .cover-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:var(--cream);
+    color:var(--night);
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    padding:18px 36px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  .cover-cta:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px -8px rgba(245,241,232,0.35);
+  }
+  .cover-cta .arrow{ transition:transform 0.2s; }
+  .cover-cta:hover .arrow{ transform:translateX(4px); }
+
+  .cover-tagline{
+    margin-top:28px;
+    font-size:14px;
+    font-style:italic;
+    color:var(--cream-dimmer);
+  }
+
+  @media (max-width:640px){
+    .cover-topbar{ padding:18px 20px; }
+    .cover-steps{ display:none; }
+    .cover-body{ padding:40px 18px 40px; }
+    .cover-desc{ font-size:15px; }
+    .cover-meta{ font-size:11.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER PAGE ============ -->
+<div class="cover" id="coverPage">
+  <div class="cover-topbar">
+    <div class="cover-brand">SANAD</div>
+    <div class="cover-steps">
+      <div class="cover-step">01</div>
+      <div class="cover-step">02</div>
+      <div class="cover-step">03</div>
+      <div class="cover-step">04</div>
+      <div class="cover-step">05</div>
+      <div class="cover-step">06</div>
+    </div>
+    <div class="cover-pct">0%</div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-chart">
+      <div class="cover-bar"></div>
+      <div class="cover-bar"></div>
+      <div class="cover-bar"></div>
+      <div class="cover-bar"></div>
+      <div class="cover-bar"></div>
+      <div class="cover-bar"></div>
+    </div>
+
+    <div class="cover-eyebrow">Étude nationale — étudiants du Maroc</div>
+    <div class="cover-logo">SANAD</div>
+
+    <p class="cover-desc">
+      On construit, ensemble, la plateforme qui soutient chaque étudiant marocain — de l'amphi jusqu'au premier emploi.
+    </p>
+
+    <div class="cover-meta">6 PARTIES <span>·</span> 20 QUESTIONS <span>·</span> ~3 MINUTES</div>
+
+    <button class="cover-cta" id="startBtn">
+      Commencer le questionnaire <span class="arrow">→</span>
+    </button>
+
+    <div class="cover-tagline">Six piliers. Un seul SANAD.</div>
+  </div>
+</div>
+
+<div class="zellige-bg"></div>
+
+<button class="mobile-toggle" id="mobileToggle" aria-label="Ouvrir le menu">☰</button>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">سند</div>
+      <div class="brand-name">SANAD</div>
+    </div>
+    <div class="brand-tag">Étude de validation — 2026</div>
+
+    <div class="ring-wrap">
+      <svg class="ring-svg" width="56" height="56" viewBox="0 0 56 56">
+        <circle class="ring-bg" cx="28" cy="28" r="23"></circle>
+        <circle class="ring-fg" id="ringFg" cx="28" cy="28" r="23" stroke-dasharray="144.5" stroke-dashoffset="144.5"></circle>
+        <text class="ring-label" x="28" y="29" id="ringPct">0%</text>
+      </svg>
+      <div>
+        <div class="ring-text-title" id="ringTitle">0 / 20 questions</div>
+        <div class="ring-text-sub">Progression globale</div>
+      </div>
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <!-- injected by JS -->
+    </ul>
+
+    <div class="sidebar-footer">
+      Vos réponses sont anonymes et utilisées uniquement pour valider le concept SANAD, plateforme d'entraide étudiante au Maroc.
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="content">
+
+      <div class="top-progress">
+        <div class="top-progress-bar"><div class="top-progress-fill" id="topFill"></div></div>
+        <div class="top-progress-count" id="topCount">Q1 / 20</div>
+      </div>
+
+      <!-- ===================== PARTIE 1 ===================== -->
+      <section class="part visible" data-part="1">
+        <div class="part-eyebrow">Partie 1 / 6</div>
+        <h1 class="part-title">Profil de l'étudiant</h1>
+        <p class="part-desc">Quelques informations générales pour mieux comprendre qui répond à ce questionnaire.</p>
+
+        <div class="q-block" data-q="1">
+          <div class="q-text"><span class="q-num">1</span><span class="q-text-inner">Quel est votre sexe ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Homme</div>
+            <div class="choice" tabindex="0">Femme</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="2">
+          <div class="q-text"><span class="q-num">2</span><span class="q-text-inner">Quel est votre âge ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">18-21</div>
+            <div class="choice" tabindex="0">22-25</div>
+            <div class="choice" tabindex="0">+25</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="3">
+          <div class="q-text"><span class="q-num">3</span><span class="q-text-inner">Dans quelle ville étudiez-vous ?</span></div>
+          <select class="text-input" data-type="select">
+            <option value="" disabled selected>Sélectionnez votre ville</option>
+            <option>Casablanca</option>
+            <option>Rabat</option>
+            <option>Fès</option>
+            <option>Marrakech</option>
+            <option>Tanger</option>
+            <option>Agadir</option>
+            <option>Meknès</option>
+            <option>Oujda</option>
+            <option>Kénitra</option>
+            <option>Tétouan</option>
+            <option>El Jadida</option>
+            <option>Béni Mellal</option>
+            <option>Autre</option>
+          </select>
+        </div>
+
+        <div class="q-block" data-q="4">
+          <div class="q-text"><span class="q-num">4</span><span class="q-text-inner">Quel est votre niveau d'études ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Licence</div>
+            <div class="choice" tabindex="0">Master</div>
+            <div class="choice" tabindex="0">Doctorat</div>
+            <div class="choice" tabindex="0">Grandes écoles</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="5">
+          <div class="q-text"><span class="q-num">5</span><span class="q-text-inner">Quel est votre domaine d'études ?</span></div>
+          <input class="text-input" type="text" data-type="text" placeholder="Ex : Informatique, Médecine, Droit, Gestion...">
+        </div>
+
+        <div class="hint-incomplete" data-hint="1">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" disabled>← Précédent</button>
+          <button class="btn btn-primary" data-next="2">Continuer →</button>
+        </div>
+      </section>
+
+      <!-- ===================== PARTIE 2 ===================== -->
+      <section class="part" data-part="2">
+        <div class="part-eyebrow">Partie 2 / 6</div>
+        <h1 class="part-title">Difficultés académiques et sociales</h1>
+        <p class="part-desc">Votre quotidien académique : pression, ressources et entraide entre pairs.</p>
+
+        <div class="q-block" data-q="6">
+          <div class="q-text"><span class="q-num">6</span><span class="q-text-inner">Ressentez-vous une forte pression académique ?</span></div>
+          <div class="scale-wrap">
+            <div class="scale" data-type="scale">
+              <div class="scale-opt" tabindex="0" data-val="1"><div class="scale-circle">1</div></div>
+              <div class="scale-opt" tabindex="0" data-val="2"><div class="scale-circle">2</div></div>
+              <div class="scale-opt" tabindex="0" data-val="3"><div class="scale-circle">3</div></div>
+              <div class="scale-opt" tabindex="0" data-val="4"><div class="scale-circle">4</div></div>
+              <div class="scale-opt" tabindex="0" data-val="5"><div class="scale-circle">5</div></div>
+            </div>
+            <div class="scale-caption"><span>Pas du tout</span><span>Énormément</span></div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="7">
+          <div class="q-text"><span class="q-num">7</span><span class="q-text-inner">Avez-vous déjà manqué de ressources pédagogiques ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="8">
+          <div class="q-text"><span class="q-num">8</span><span class="q-text-inner">Collaborez-vous régulièrement avec vos camarades ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Parfois</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="9">
+          <div class="q-text"><span class="q-num">9</span><span class="q-text-inner">Avez-vous accès à un mentor ou un accompagnateur professionnel ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="hint-incomplete" data-hint="2">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" data-prev="1">← Précédent</button>
+          <button class="btn btn-primary" data-next="3">Continuer →</button>
+        </div>
+      </section>
+
+      <!-- ===================== PARTIE 3 ===================== -->
+      <section class="part" data-part="3">
+        <div class="part-eyebrow">Partie 3 / 6</div>
+        <h1 class="part-title">Précarité étudiante</h1>
+        <p class="part-desc">Vos contraintes financières et votre rapport au partage de ressources.</p>
+
+        <div class="q-block" data-q="10">
+          <div class="q-text"><span class="q-num">10</span><span class="q-text-inner">Rencontrez-vous des difficultés financières durant vos études ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="11">
+          <div class="q-text"><span class="q-num">11</span><span class="q-text-inner">Avez-vous déjà échangé ou donné des livres/matériel scolaire ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="12">
+          <div class="q-text"><span class="q-num">12</span><span class="q-text-inner">Seriez-vous intéressé par une plateforme d'échange de ressources gratuites ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="hint-incomplete" data-hint="3">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" data-prev="2">← Précédent</button>
+          <button class="btn btn-primary" data-next="4">Continuer →</button>
+        </div>
+      </section>
+
+      <!-- ===================== PARTIE 4 ===================== -->
+      <section class="part" data-part="4">
+        <div class="part-eyebrow">Partie 4 / 6</div>
+        <h1 class="part-title">Insertion professionnelle</h1>
+        <p class="part-desc">Votre perception du lien entre formation et marché de l'emploi.</p>
+
+        <div class="q-block" data-q="13">
+          <div class="q-text"><span class="q-num">13</span><span class="q-text-inner">Êtes-vous satisfait des opportunités de stage dans votre domaine ?</span></div>
+          <div class="scale-wrap">
+            <div class="scale" data-type="scale">
+              <div class="scale-opt" tabindex="0" data-val="1"><div class="scale-circle">1</div></div>
+              <div class="scale-opt" tabindex="0" data-val="2"><div class="scale-circle">2</div></div>
+              <div class="scale-opt" tabindex="0" data-val="3"><div class="scale-circle">3</div></div>
+              <div class="scale-opt" tabindex="0" data-val="4"><div class="scale-circle">4</div></div>
+              <div class="scale-opt" tabindex="0" data-val="5"><div class="scale-circle">5</div></div>
+            </div>
+            <div class="scale-caption"><span>Pas satisfait</span><span>Très satisfait</span></div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="14">
+          <div class="q-text"><span class="q-num">14</span><span class="q-text-inner">Avez-vous des difficultés à trouver un emploi après les études ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="15">
+          <div class="q-text"><span class="q-num">15</span><span class="q-text-inner">Pensez-vous que votre formation vous prépare bien au marché du travail ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="hint-incomplete" data-hint="4">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" data-prev="3">← Précédent</button>
+          <button class="btn btn-primary" data-next="5">Continuer →</button>
+        </div>
+      </section>
+
+      <!-- ===================== PARTIE 5 ===================== -->
+      <section class="part" data-part="5">
+        <div class="part-eyebrow">Partie 5 / 6</div>
+        <h1 class="part-title">Rapport aux technologies</h1>
+        <p class="part-desc">Votre usage actuel et votre ouverture aux outils d'intelligence artificielle.</p>
+
+        <div class="q-block" data-q="16">
+          <div class="q-text"><span class="q-num">16</span><span class="q-text-inner">Utilisez-vous des outils d'IA dans vos études ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="17">
+          <div class="q-text"><span class="q-num">17</span><span class="q-text-inner">Seriez-vous prêt à utiliser un assistant IA pour vous aider académiquement ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="hint-incomplete" data-hint="5">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" data-prev="4">← Précédent</button>
+          <button class="btn btn-primary" data-next="6">Continuer →</button>
+        </div>
+      </section>
+
+      <!-- ===================== PARTIE 6 ===================== -->
+      <section class="part" data-part="6">
+        <div class="part-eyebrow">Partie 6 / 6</div>
+        <h1 class="part-title">Validation du concept SANAD</h1>
+        <p class="part-desc">Dernière étape : aidez-nous à valider l'intérêt pour SANAD et sa fonctionnalité phare.</p>
+
+        <div class="q-block" data-q="18">
+          <div class="q-text"><span class="q-num">18</span><span class="q-text-inner">Connaissez-vous des plateformes d'entraide étudiante au Maroc ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="19">
+          <div class="q-text"><span class="q-num">19</span><span class="q-text-inner">Seriez-vous prêt à utiliser une plateforme comme SANAD ?</span></div>
+          <div class="choices" data-type="single">
+            <div class="choice" tabindex="0">Oui</div>
+            <div class="choice" tabindex="0">Non</div>
+          </div>
+        </div>
+
+        <div class="q-block" data-q="20">
+          <div class="q-text"><span class="q-num">20</span><span class="q-text-inner">Quelle fonctionnalité vous intéresse le plus ?</span></div>
+          <div class="feature-grid" data-type="single">
+            <div class="feature-card" tabindex="0" data-val="Academy">
+              <span class="feature-icon">🎓</span>
+              <div class="feature-name">Academy</div>
+              <div class="feature-desc">Ressources et cours partagés entre étudiants</div>
+            </div>
+            <div class="feature-card" tabindex="0" data-val="Mentor">
+              <span class="feature-icon">🤝</span>
+              <div class="feature-name">Mentor</div>
+              <div class="feature-desc">Accompagnement par des pairs ou professionnels</div>
+            </div>
+            <div class="feature-card" tabindex="0" data-val="Green">
+              <span class="feature-icon">♻️</span>
+              <div class="feature-name">Green</div>
+              <div class="feature-desc">Échange et don de matériel scolaire</div>
+            </div>
+            <div class="feature-card" tabindex="0" data-val="AI">
+              <span class="feature-icon">✨</span>
+              <div class="feature-name">AI</div>
+              <div class="feature-desc">Assistant intelligent pour vos études</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint-incomplete" data-hint="6">⚠ Répondez à toutes les questions pour continuer</div>
+        <div class="actions">
+          <button class="btn btn-ghost" data-prev="5">← Précédent</button>
+          <button class="btn btn-primary" id="submitBtn">Envoyer mes réponses ✓</button>
+        </div>
+      </section>
+
+      <!-- ===================== DONE ===================== -->
+      <section class="done-screen" id="doneScreen">
+        <div class="done-badge" id="doneBadge">✓</div>
+        <h1 class="done-title" id="doneTitle">شكراً — Merci pour votre participation !</h1>
+        <p class="done-desc" id="doneDesc">Vos réponses ont été enregistrées. Elles nous aideront à construire une version de SANAD vraiment utile aux étudiants marocains.</p>
+        <button class="btn btn-ghost" id="retryBtn" style="display:none; margin:24px auto 0;">Réessayer l'envoi</button>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const PARTS = [
+    {id:1, title:"Profil", sub:"5 questions", qs:[1,2,3,4,5]},
+    {id:2, title:"Vie académique", sub:"4 questions", qs:[6,7,8,9]},
+    {id:3, title:"Précarité", sub:"3 questions", qs:[10,11,12]},
+    {id:4, title:"Insertion pro", sub:"3 questions", qs:[13,14,15]},
+    {id:5, title:"Technologies", sub:"2 questions", qs:[16,17]},
+    {id:6, title:"Concept SANAD", sub:"3 questions", qs:[18,19,20]},
+  ];
+
+  const QUESTION_LABELS = {
+    1:"Sexe", 2:"Âge", 3:"Ville d'études", 4:"Niveau d'études", 5:"Domaine d'études",
+    6:"Pression académique (1-5)", 7:"Manque de ressources pédagogiques", 8:"Collaboration avec camarades", 9:"Accès à un mentor",
+    10:"Difficultés financières", 11:"Échange/don de matériel scolaire", 12:"Intérêt plateforme d'échange",
+    13:"Satisfaction opportunités de stage (1-5)", 14:"Difficultés à trouver un emploi", 15:"Formation adaptée au marché du travail",
+    16:"Utilisation d'outils IA", 17:"Ouverture à un assistant IA",
+    18:"Connaissance de plateformes d'entraide", 19:"Intérêt pour SANAD", 20:"Fonctionnalité préférée"
+  };
+  const TOTAL_Q = 20;
+  const answers = {}; // qNum -> value
+  let currentPart = 1;
+  let maxUnlockedPart = 1;
+
+  const navList = document.getElementById('navList');
+  const ringFg = document.getElementById('ringFg');
+  const ringPct = document.getElementById('ringPct');
+  const ringTitle = document.getElementById('ringTitle');
+  const topFill = document.getElementById('topFill');
+  const topCount = document.getElementById('topCount');
+  const RING_CIRC = 144.5;
+
+  function buildNav(){
+    navList.innerHTML = '';
+    PARTS.forEach(p => {
+      const li = document.createElement('li');
+      li.className = 'nav-item';
+      li.tabIndex = 0;
+      li.dataset.part = p.id;
+      li.innerHTML = `
+        <div class="nav-num">${p.id}</div>
+        <div class="nav-text">
+          <div class="nav-title">${p.title}</div>
+          <div class="nav-sub">${p.sub}</div>
+        </div>
+        <span class="lock-icon">🔒</span>
+      `;
+      li.addEventListener('click', () => tryGoToPart(p.id));
+      li.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); tryGoToPart(p.id);} });
+      navList.appendChild(li);
+    });
+    refreshNav();
+  }
+
+  function refreshNav(){
+    document.querySelectorAll('.nav-item').forEach(item => {
+      const id = parseInt(item.dataset.part);
+      item.classList.remove('active','done','locked');
+      const lockIcon = item.querySelector('.lock-icon');
+      if(id === currentPart) item.classList.add('active');
+      if(isPartComplete(id)) item.classList.add('done');
+      if(id > maxUnlockedPart) {
+        item.classList.add('locked');
+        lockIcon.style.display = 'inline';
+      } else {
+        lockIcon.style.display = 'none';
+      }
+    });
+  }
+
+  function isPartComplete(partId){
+    const part = PARTS.find(p => p.id === partId);
+    return part.qs.every(q => answers[q] !== undefined && answers[q] !== '');
+  }
+
+  function tryGoToPart(id){
+    if(id > maxUnlockedPart) return; // locked
+    showPart(id);
+  }
+
+  function showPart(id){
+    currentPart = id;
+    document.querySelectorAll('.part').forEach(s => s.classList.remove('visible'));
+    const target = document.querySelector(`.part[data-part="${id}"]`);
+    if(target) target.classList.add('visible');
+    document.getElementById('doneScreen').classList.remove('visible');
+    hideHint(id);
+    refreshNav();
+    updateProgress();
+    closeMobileSidebar();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function hideHint(id){
+    const h = document.querySelector(`.hint-incomplete[data-hint="${id}"]`);
+    if(h) h.classList.remove('show');
+  }
+
+  function updateProgress(){
+    const answeredCount = Object.keys(answers).filter(k => answers[k] !== '' && answers[k] !== undefined).length;
+    const pct = Math.round((answeredCount / TOTAL_Q) * 100);
+    const offset = RING_CIRC - (RING_CIRC * pct / 100);
+    ringFg.style.strokeDashoffset = offset;
+    ringPct.textContent = pct + '%';
+    ringTitle.textContent = `${answeredCount} / ${TOTAL_Q} questions`;
+    topFill.style.width = Math.max(pct,3) + '%';
+
+    // current question pointer for top bar: first unanswered or part's first q
+    const part = PARTS.find(p => p.id === currentPart);
+    const firstUnanswered = part.qs.find(q => answers[q] === undefined) || part.qs[part.qs.length-1];
+    topCount.textContent = `Q${firstUnanswered} / ${TOTAL_Q}`;
+  }
+
+  function setAnswer(qNum, value){
+    answers[qNum] = value;
+    updateProgress();
+  }
+
+  // ----- single choice (pills) -----
+  document.querySelectorAll('.q-block .choices[data-type="single"]').forEach(group => {
+    const qBlock = group.closest('.q-block');
+    const qNum = parseInt(qBlock.dataset.q);
+    group.querySelectorAll('.choice').forEach(choice => {
+      choice.addEventListener('click', () => selectChoice(group, choice, qNum, qBlock));
+      choice.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectChoice(group, choice, qNum, qBlock);} });
+    });
+  });
+
+  function selectChoice(group, choice, qNum, qBlock){
+    group.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+    choice.classList.add('selected');
+    qBlock.classList.add('answered');
+    setAnswer(qNum, choice.textContent.trim());
+  }
+
+  // ----- scale 1-5 -----
+  document.querySelectorAll('.scale[data-type="scale"]').forEach(group => {
+    const qBlock = group.closest('.q-block');
+    const qNum = parseInt(qBlock.dataset.q);
+    group.querySelectorAll('.scale-opt').forEach(opt => {
+      opt.addEventListener('click', () => selectScale(group, opt, qNum, qBlock));
+      opt.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectScale(group, opt, qNum, qBlock);} });
+    });
+  });
+
+  function selectScale(group, opt, qNum, qBlock){
+    group.querySelectorAll('.scale-opt').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    qBlock.classList.add('answered');
+    setAnswer(qNum, opt.dataset.val);
+  }
+
+  // ----- feature cards (Q20) -----
+  document.querySelectorAll('.feature-grid[data-type="single"]').forEach(group => {
+    const qBlock = group.closest('.q-block');
+    const qNum = parseInt(qBlock.dataset.q);
+    group.querySelectorAll('.feature-card').forEach(card => {
+      card.addEventListener('click', () => selectFeature(group, card, qNum, qBlock));
+      card.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectFeature(group, card, qNum, qBlock);} });
+    });
+  });
+
+  function selectFeature(group, card, qNum, qBlock){
+    group.querySelectorAll('.feature-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    qBlock.classList.add('answered');
+    setAnswer(qNum, card.dataset.val);
+  }
+
+  // ----- text & select inputs -----
+  document.querySelectorAll('.text-input').forEach(input => {
+    const qBlock = input.closest('.q-block');
+    const qNum = parseInt(qBlock.dataset.q);
+    input.addEventListener('input', () => {
+      qBlock.classList.toggle('answered', input.value.trim() !== '');
+      setAnswer(qNum, input.value.trim());
+    });
+    input.addEventListener('change', () => {
+      qBlock.classList.toggle('answered', input.value.trim() !== '');
+      setAnswer(qNum, input.value.trim());
+    });
+  });
+
+  // ----- next / prev buttons -----
+  document.querySelectorAll('[data-next]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nextId = parseInt(btn.dataset.next);
+      const part = PARTS.find(p => p.id === currentPart);
+      if(!isPartComplete(currentPart)){
+        const h = document.querySelector(`.hint-incomplete[data-hint="${currentPart}"]`);
+        if(h) h.classList.add('show');
+        // shake the first unanswered block
+        const firstUnanswered = part.qs.find(q => answers[q] === undefined);
+        const block = document.querySelector(`.q-block[data-q="${firstUnanswered}"]`);
+        if(block){ block.scrollIntoView({behavior:'smooth', block:'center'}); }
+        return;
+      }
+      maxUnlockedPart = Math.max(maxUnlockedPart, nextId);
+      showPart(nextId);
+    });
+  });
+
+  document.querySelectorAll('[data-prev]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const prevId = parseInt(btn.dataset.prev);
+      showPart(prevId);
+    });
+  });
+
+  // ----- submit (Web3Forms email) -----
+  const WEB3FORMS_KEY = "7b898504-3d9a-4a72-8418-51019ace8822";
+  const submitBtn = document.getElementById('submitBtn');
+  const doneBadge = document.getElementById('doneBadge');
+  const doneTitle = document.getElementById('doneTitle');
+  const doneDesc = document.getElementById('doneDesc');
+  const retryBtn = document.getElementById('retryBtn');
+
+  function buildPayload(){
+    const payload = {
+      access_key: WEB3FORMS_KEY,
+      subject: "Nouvelle réponse — Questionnaire SANAD",
+      from_name: "SANAD — Questionnaire",
+    };
+    for(let q = 1; q <= TOTAL_Q; q++){
+      const label = QUESTION_LABELS[q] || `Question ${q}`;
+      payload[`Q${q} — ${label}`] = answers[q] !== undefined ? answers[q] : "";
+    }
+    return payload;
+  }
+
+  function showSending(){
+    doneBadge.classList.remove('error');
+    doneBadge.classList.add('loading');
+    doneTitle.textContent = "Envoi en cours…";
+    doneDesc.textContent = "Merci de patienter quelques secondes, vos réponses sont en route.";
+    retryBtn.style.display = 'none';
+  }
+
+  function showSuccess(){
+    doneBadge.classList.remove('loading','error');
+    doneTitle.textContent = "شكراً — Merci pour votre participation !";
+    doneDesc.textContent = "Vos réponses ont été enregistrées. Elles nous aideront à construire une version de SANAD vraiment utile aux étudiants marocains.";
+    retryBtn.style.display = 'none';
+  }
+
+  function showError(){
+    doneBadge.classList.remove('loading');
+    doneBadge.classList.add('error');
+    doneTitle.textContent = "L'envoi n'a pas fonctionné";
+    doneDesc.textContent = "Vérifiez votre connexion internet et réessayez. Vos réponses sont toujours là, rien n'est perdu.";
+    retryBtn.style.display = 'inline-flex';
+  }
+
+  async function sendAnswers(){
+    showSending();
+    document.querySelectorAll('.part').forEach(s => s.classList.remove('visible'));
+    document.getElementById('doneScreen').classList.add('visible');
+    window.scrollTo({top:0, behavior:'smooth'});
+
+    try{
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(buildPayload())
+      });
+      const data = await res.json();
+      if(data.success){
+        showSuccess();
+      } else {
+        showError();
+      }
+    } catch(err){
+      showError();
+    }
+  }
+
+  submitBtn.addEventListener('click', () => {
+    if(!isPartComplete(6)){
+      const h = document.querySelector('.hint-incomplete[data-hint="6"]');
+      if(h) h.classList.add('show');
+      const part = PARTS.find(p => p.id === 6);
+      const firstUnanswered = part.qs.find(q => answers[q] === undefined);
+      const block = document.querySelector(`.q-block[data-q="${firstUnanswered}"]`);
+      if(block) block.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+    sendAnswers();
+  });
+
+  retryBtn.addEventListener('click', sendAnswers);
+
+  // ----- mobile sidebar -----
+  const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('mobileToggle');
+  mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+  function closeMobileSidebar(){ sidebar.classList.remove('open'); }
+
+  // ----- init -----
+  buildNav();
+  updateProgress();
+
+  // ----- cover page -----
+  const coverPage = document.getElementById('coverPage');
+  const startBtn = document.getElementById('startBtn');
+  startBtn.addEventListener('click', () => {
+    coverPage.classList.add('hidden');
+    document.body.classList.add('app-active');
+  });
+})();
+</script>
+</body>
+</html>
